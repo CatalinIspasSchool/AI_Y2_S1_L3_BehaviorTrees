@@ -28,8 +28,6 @@ void AIConstructor_BT::DefineActions()
 
 
 		};
-
-
 	// Link the function to an identifier
 	AddActionByName("ActionPatrol", patrolFunction);
 
@@ -47,8 +45,6 @@ void AIConstructor_BT::DefineActions()
 
 
 		};
-
-
 	// Link the function to an identifier
 	AddActionByName("ActionGetPatrolPath", getPatrolPathFunction);
 
@@ -124,7 +120,10 @@ void AIConstructor_BT::DefineOptions()
 	// -  TREE CONNECTIONS - 
 	// Add connections between nodes using AddOptionToTreeNode()
 	
+	AddOptionToTreeNode("Root", "OptionPatrolSeq");
 
+	AddOptionToTreeNode("OptionPatrolSeq", "OptionGetPatrolPath");
+	AddOptionToTreeNode("OptionPatrolSeq", "OptionPatrol");
 
 
 
