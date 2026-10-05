@@ -48,12 +48,13 @@ void AIConstructor_BT::DefineActions()
 	// Link the function to an identifier
 	AddActionByName("ActionGetPatrolPath", getPatrolPathFunction);
 
+	auto restFunction = [](AIBrainBlackboardBase& bb) -> ActionStatus {
+		AIActor_Guard* actor = static_cast<AIActor_Guard*>(bb.GetActorContext());
 
+		return actor->Rest();
+		};
 
-
-	// TASK TODO - Add Additional Actions
-
-
+	AddActionByName("ActionRest", restFunction);
 
 
 
@@ -69,12 +70,15 @@ void AIConstructor_BT::DefineConsiderations()
 
 		};
 
-
 	AddConsiderationByName("ConsiderationSeePlayer", cCanSeeEnemy);
 
 
-	// TASK TODO - Add Additional Considerations
+	auto cLowEnergy = [](AIBrainBlackboardBase& bb) -> bool {
+		bool energyLow = (bb.GetValue<float>("Energy") <= 1);
+		return (energyLow);
+		};
 	
+	AddConsiderationByName("ConsiderationLowEnergy", cLowEnergy);
 }
 
 
@@ -94,6 +98,7 @@ void AIConstructor_BT::DefineOptions()
 
 	AddOptionByName("OptionGetPatrolPath", "ActionGetPatrolPath");
 	AddOptionByName("OptionPatrol", "ActionPatrol");
+	AddOptionByName("OptionRest", "ActionRest");
 
 
 
@@ -106,6 +111,8 @@ void AIConstructor_BT::DefineOptions()
 	// You do not need to create the Root, that node is already created (called "Root")
 
 	AddControlNodeByName("OptionPatrolSeq", AIReasonerBase::Sequence);
+	AddControlNodeByName("OptionRestSeq", AIReasonerBase::Sequence);
+	AddControlNodeByName("OptionLowEnergyDec", AIReasonerBase::Decorator);
 
 
 
@@ -113,18 +120,19 @@ void AIConstructor_BT::DefineOptions()
 	// Add any considerations to Decorators using AddDecoratorConsideration()
 	// Add any considerations to Leaf nodes using AddOptionConsideration()
 
-
+	AddDecoratorConsideration("OptionLowEnergyDec", "ConsiderationLowEnergy");
 
 
 
 	// -  TREE CONNECTIONS - 
 	// Add connections between nodes using AddOptionToTreeNode()
-	
+
+	AddOptionToTreeNode("Root", "OptionRestSeq");
+		AddOptionToTreeNode("OptionRestSeq", "OptionLowEnergyDec");
+		AddOptionToTreeNode("OptionRestSeq", "OptionRest");
 	AddOptionToTreeNode("Root", "OptionPatrolSeq");
-
-	AddOptionToTreeNode("OptionPatrolSeq", "OptionGetPatrolPath");
-	AddOptionToTreeNode("OptionPatrolSeq", "OptionPatrol");
-
+		AddOptionToTreeNode("OptionPatrolSeq", "OptionGetPatrolPath");
+		AddOptionToTreeNode("OptionPatrolSeq", "OptionPatrol");
 
 
 
