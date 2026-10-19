@@ -16,7 +16,6 @@ void AIConstructor_BT::DefineActions()
 
 
 
-	// ** Patrol Action **
 
 	//Define the function for Patrolling
 	auto patrolFunction = [](AIBrainBlackboardBase& bb) -> ActionStatus {
@@ -32,8 +31,6 @@ void AIConstructor_BT::DefineActions()
 	AddActionByName("ActionPatrol", patrolFunction);
 
 
-	// ** Get Patrol Path Action **
-
 	//Define the function for  Get Patrol Path 
 	auto getPatrolPathFunction = [](AIBrainBlackboardBase& bb) -> ActionStatus {
 		AIActor_Guard* actor = static_cast<AIActor_Guard*>(bb.GetActorContext());
@@ -48,6 +45,7 @@ void AIConstructor_BT::DefineActions()
 	// Link the function to an identifier
 	AddActionByName("ActionGetPatrolPath", getPatrolPathFunction);
 
+
 	auto restFunction = [](AIBrainBlackboardBase& bb) -> ActionStatus {
 		AIActor_Guard* actor = static_cast<AIActor_Guard*>(bb.GetActorContext());
 
@@ -56,6 +54,14 @@ void AIConstructor_BT::DefineActions()
 
 	AddActionByName("ActionRest", restFunction);
 
+	
+	auto chaseFunction = [](AIBrainBlackboardBase& bb) -> ActionStatus {
+		AIActor_Guard* actor = static_cast<AIActor_Guard*>(bb.GetActorContext());
+
+		return actor->Chase();
+		};
+
+	AddActionByName("ActionChase", chaseFunction);
 
 
 }
@@ -98,6 +104,7 @@ void AIConstructor_BT::DefineOptions()
 
 	AddOptionByName("OptionGetPatrolPath", "ActionGetPatrolPath");
 	AddOptionByName("OptionPatrol", "ActionPatrol");
+	AddOptionByName("OptionChase","ActionChase");
 	AddOptionByName("OptionRest", "ActionRest");
 
 
@@ -112,7 +119,9 @@ void AIConstructor_BT::DefineOptions()
 
 	AddControlNodeByName("OptionPatrolSeq", AIReasonerBase::Sequence);
 	AddControlNodeByName("OptionRestSeq", AIReasonerBase::Sequence);
+	AddControlNodeByName("OptionChaseSeq", AIReasonerBase::Sequence);
 	AddControlNodeByName("OptionLowEnergyDec", AIReasonerBase::Decorator);
+	AddControlNodeByName("OptionPlayerSpottedDec", AIReasonerBase::Decorator);
 
 
 
@@ -121,6 +130,7 @@ void AIConstructor_BT::DefineOptions()
 	// Add any considerations to Leaf nodes using AddOptionConsideration()
 
 	AddDecoratorConsideration("OptionLowEnergyDec", "ConsiderationLowEnergy");
+	AddDecoratorConsideration("OptionPlayerSpottedDec", "ConsiderationSeePlayer");
 
 
 
@@ -130,6 +140,9 @@ void AIConstructor_BT::DefineOptions()
 	AddOptionToTreeNode("Root", "OptionRestSeq");
 		AddOptionToTreeNode("OptionRestSeq", "OptionLowEnergyDec");
 		AddOptionToTreeNode("OptionRestSeq", "OptionRest");
+	AddOptionToTreeNode("Root", "OptionChaseSeq");
+		AddOptionToTreeNode("OptionChaseSeq", "OptionPlayerSpottedDec");
+		AddOptionToTreeNode("OptionChaseSeq", "OptionChase");
 	AddOptionToTreeNode("Root", "OptionPatrolSeq");
 		AddOptionToTreeNode("OptionPatrolSeq", "OptionGetPatrolPath");
 		AddOptionToTreeNode("OptionPatrolSeq", "OptionPatrol");
